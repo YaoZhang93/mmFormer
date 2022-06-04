@@ -229,28 +229,3 @@ class BraTS(Dataset):
 
     def collate(self, batch):
         return [torch.cat(v) for v in zip(*batch)]
-
-if __name__ == '__main__':
-    train_root = './Training/'
-    split_dataset(train_root)
-    # read_split()
-    
-    '''
-    with open('./split_3fold.txt') as f:
-        lines = f.readlines()
-        train_list = lines[0].split(',')
-        for i, j in enumerate(train_list):
-            train_list[i] = j.replace('/dfsdata2/wangyx57_data/wangyx57_data/DB/MICCAI/MICCAI_BraTS_2018_Data_', './').replace('\'', '').replace('[', '').replace(']', '').strip()
-        print(len(train_list))
-        print(train_list)
-        val_list = lines[1].split(',')
-        for i, j in enumerate(val_list):
-            val_list[i] = j.replace('/dfsdata2/wangyx57_data/wangyx57_data/DB/MICCAI/MICCAI_BraTS_2018_Data_', './').replace('\'', '').replace('[', '').replace(']', '').strip()
-        print(len(val_list))
-        print(val_list)
-       
-    with open('./3folds.txt', 'w') as f1:
-        f1.write(str(train_list))
-        f1.write('\n')
-        f1.write(str(val_list))
-    '''
