@@ -1,0 +1,13 @@
+{
+        "Token":"YqvdHn9BY_Qx1YYfWKU0yQ",
+        "business_flag": "jarvis_group_share",
+        "model_local_file_path": "/apdcephfs/share_1290796/medzhang_data/Task/multimodal/mmformer_pad_in_intra_inter_dsv2/mmformer_code",
+        "host_num": 1,
+        "host_gpu_num": 1,
+        "GPUName": "V100",
+        "is_elasticity": true,
+        "enable_evicted_pulled_up": true,
+        "enable_evicted_end_task": true,
+        "enable_rdma": true,
+        "image_full_name": "mirrors.tencent.com/jarvis_medai/heqinzhu-torch1.7.1-cuda11-py36-cv2-timm-sitk-scimg-pandas:1026"
+}
