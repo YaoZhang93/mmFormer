@@ -17,7 +17,7 @@ Accepted to MICCAI 2022
 
   - Put `Training` folder in to `./data` 
 
-  - Preprocess the data by
+  - In `./data`, preprocess the data by
 
   `python3 preprocess.py`
 
@@ -25,22 +25,15 @@ Accepted to MICCAI 2022
 
   - Train the model by
 
-  `python run/run_training.py 3d_fullres MAMLTrainerV2 32 0`
+  `python -m torch.distributed.launch --nproc_per_node=4 --master_port 20003 train.py`
 
 * Test
 
   - inference on the test data by
 
-  `python inference/predict_simple.py -i INPUT_PATH -o OUTPUT_PATH -t 32 -f 0 -tr MAMLTrainerV2`
+  `python test`
 
- `MAML` is integrated with the out-of-box [nnUNet](https://github.com/MIC-DKFZ/nnUNet). Please refer to it for more usage.
+  - To inference with missing modalities, please 
 
-## Citation
-
-If you find this code and paper useful for your research, please kindly cite our paper.
-
-
-
-## Acknowledgement
-
-`MAML` is integrated with the out-of-box [nnUNet](https://github.com/MIC-DKFZ/nnUNet).
+## Referrence
+* [TransBTS](https://github.com/Wenxuan-1119/TransBTS)
