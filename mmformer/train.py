@@ -11,7 +11,7 @@ import setproctitle
 import torch
 import torch.backends.cudnn as cudnn
 import torch.optim
-from models.TransBTS.mmformer import get_mmFormer
+from models.mmformer.mmformer import get_mmFormer
 import torch.distributed as dist
 from models import criterions
 
@@ -34,7 +34,7 @@ parser.add_argument('--experiment', default='mmformer', type=str)
 parser.add_argument('--date', default=local_time.split(' ')[0], type=str)
 
 parser.add_argument('--description',
-                    default='TransBTS,'
+                    default='mmFormer,'
                             'training on train.txt!',
                     type=str)
 

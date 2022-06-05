@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from models.TransBTS.Transformer import mmTransformerModel, TransformerModel
-from models.TransBTS.PositionalEncoding import FixedPositionalEncoding,LearnedPositionalEncoding
-from models.TransBTS.Unet_skipconnection import Unet
+from models.mmformer.Transformer import mmTransformerModel, TransformerModel
+from models.mmformer.PositionalEncoding import FixedPositionalEncoding,LearnedPositionalEncoding
+from models.mmformer.Unet_skipconnection import Unet
 import torch.nn.functional as F
 
 
@@ -497,15 +497,3 @@ def get_mmFormer(dataset='brats', _conv_repr=True, _pe_type="learned"):
     )
 
     return aux_layers, model
-
-
-if __name__ == '__main__':
-    with torch.no_grad():
-        import os
-        os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-        cuda0 = torch.device('cuda:0')
-        x = torch.rand((1, 4, 128, 128, 128), device=cuda0)
-        _, model = TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned")
-        model.cuda()
-        y = model(x)
-        print(y.shape)

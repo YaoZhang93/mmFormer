@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 
 from data.BraTS import BraTS
 from predict import validate_softmax
-from models.TransBTS.mmformer import get_mmFormer
+from models.mmformer.mmformer import get_mmFormer
 
 
 parser = argparse.ArgumentParser()

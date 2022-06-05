@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from models.TransBTS.IntmdSequential import IntermediateSequential
+from models.mmformer.IntmdSequential import IntermediateSequential
 
 
 class SelfAttention(nn.Module):
