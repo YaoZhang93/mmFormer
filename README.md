@@ -1,7 +1,7 @@
 # mmFormer: Multimodal Medical Transformer for Incomplete Multimodal Learning of Brain Tumor Segmentation
 This is the implementation for the paper:
 
-[mmFormer: Multimodal Medical Transformer for Incomplete Multimodal Learning of Brain Tumor Segmentation](https://arxiv.org/pdf/2107.09842.pdf)
+[mmFormer: Multimodal Medical Transformer for Incomplete Multimodal Learning of Brain Tumor Segmentation](https://arxiv.org/abs/2206.02425)
 
 Accepted to MICCAI 2022
 
