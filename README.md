@@ -41,6 +41,20 @@ Accurate brain tumor segmentation from Magnetic Resonance Imaging (MRI) is desir
   
     `0: FLAIR, 1:T1CE, 2:T1, 3:T2`
 
+## Citation
+
+If you find this code and paper useful for your research, please kindly cite our paper.
+
+```
+@article{zhang2022mmformer,
+  title={mmFormer: Multimodal Medical Transformer for Incomplete Multimodal Learning of Brain Tumor Segmentation},
+  author={Zhang, Yao and He, Nanjun and Yang, Jiawei and Li, Yuexiang and Wei, Dong and Huang, Yawen and Zhang, Yang and He, Zhiqiang and Zheng, Yefeng},
+  journal={arXiv preprint arXiv:2206.02425},
+  year={2022}
+}
+```
+
 ## Reference
+
 * [TransBTS](https://github.com/Wenxuan-1119/TransBTS)
 
