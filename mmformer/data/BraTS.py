@@ -161,8 +161,8 @@ def split_dataset(data_root, nfold=3, seed=0, select=0):
 def read_split():
     with open('./data/3folds.txt') as f:
         lines = f.readlines()
-        train_patients_list = lines[0].replace('[', '').replace(']', '').replace(' ', '').replace('\'', '').split(',')
-        val_patients_list = lines[1].replace('[', '').replace(']', '').replace(' ', '').replace('\'', '').split(',')
+        train_patients_list = lines[0].strip().replace('[', '').replace(']', '').replace(' ', '').replace('\'', '').split(',')
+        val_patients_list = lines[1].strip().replace('[', '').replace(']', '').replace(' ', '').replace('\'', '').split(',')
 
         train_patients_list = [x.replace('.', './data') for x in train_patients_list]
         val_patients_list = [x.replace('.', './data') for x in val_patients_list]
