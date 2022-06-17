@@ -100,7 +100,7 @@ parser.add_argument('--end_epoch', default=1000, type=int)
 
 parser.add_argument('--save_freq', default=50, type=int)
 
-parser.add_argument('--resume', default=None, type=str)
+parser.add_argument('--resume', default='', type=str)
 
 parser.add_argument('--load', default=True, type=bool)
 

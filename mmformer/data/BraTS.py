@@ -153,20 +153,23 @@ def split_dataset(data_root, nfold=3, seed=0, select=0):
                 train_patients_list.append(patients_dir[idx])
     print(f"train patients: {len(train_patients_list)}, test patients: {len(val_patients_list)}")
     
-    print(np.sort(train_patients_list))
+    # print(np.sort(train_patients_list))
 
     return train_patients_list, val_patients_list
 
 
 def read_split():
-    with open('./3folds.txt') as f:
+    with open('./data/3folds.txt') as f:
         lines = f.readlines()
         train_patients_list = lines[0].replace('[', '').replace(']', '').replace(' ', '').replace('\'', '').split(',')
         val_patients_list = lines[1].replace('[', '').replace(']', '').replace(' ', '').replace('\'', '').split(',')
-        
+
+        train_patients_list = [x.replace('.', './data') for x in train_patients_list]
+        val_patients_list = [x.replace('.', './data') for x in val_patients_list]
+
         print(f"train patients: {len(train_patients_list)}, test patients: {len(val_patients_list)}")
     
-        print(np.sort(train_patients_list))
+        # print(np.sort(train_patients_list))
     
         return train_patients_list, val_patients_list
 
@@ -174,7 +177,7 @@ def read_split():
 class BraTS(Dataset):
     def __init__(self, list_file, root='', mode='train', drop_modal=False):
         train_list, val_list = split_dataset(root)
-        # train_list, val_list = read_split(root)
+        # train_list, val_list = read_split()
 
         paths, names, missing_modal_list = [], [], []
         if mode == 'train':
