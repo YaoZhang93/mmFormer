@@ -2,7 +2,7 @@ import os
 join = os.path.join
 import numpy as np
 
-data_path = '../../../../DB/BraTS18/ori_data/Training'
+data_path = './data/Training/'
 data_list_file = './data/train.txt'
 
 types = ['HGG', 'LGG']
