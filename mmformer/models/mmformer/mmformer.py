@@ -75,8 +75,8 @@ class mmFormer(nn.Module):
 
         self.inter_position_encoding = LearnedPositionalEncoding(self.seq_length*self.num_channels, self.embedding_dim, self.seq_length*self.num_channels)
         self.inter_pe_dropout = nn.Dropout(p=self.dropout_rate)
-        self.fusion = nn.Sequential(nn.LayerNorm(embedding_dim*self.num_channels), nn.LeakyReLU(), nn.Linear(embedding_dim*self.num_channels, embedding_dim))
-
+        self.fusion = nn.Sequential(nn.LayerNorm(self.seq_length*self.num_channels), nn.LeakyReLU(), nn.Linear(self.seq_length*self.num_channels, self.seq_length))
+        
         self.inter_transformer = mmTransformerModel(
             num_channels,
             embedding_dim,
