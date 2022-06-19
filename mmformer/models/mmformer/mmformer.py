@@ -40,7 +40,7 @@ class mmFormer(nn.Module):
         self.seq_length = self.num_patches
         self.flatten_dim = 128 * num_channels
 
-        self.linear_encoding = nn.Linear(self.flatten_dim, self.embedding_dim)
+        # self.linear_encoding = nn.Linear(self.flatten_dim, self.embedding_dim)
 
         self.shadow_tokens = []
         self.position_encoding = []
