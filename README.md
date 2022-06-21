@@ -31,7 +31,7 @@ Accurate brain tumor segmentation from Magnetic Resonance Imaging (MRI) is desir
 
   - inference on the test data by
 
-  `python test`
+  `python test.py`
 
   - To inference with missing modalities, please refer to line 201 in [`BraTS.py`](https://github.com/YaoZhang93/mmFormer/blob/main/mmformer/data/BraTS.py)
   
