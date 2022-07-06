@@ -3,7 +3,7 @@ This is the implementation for the paper:
 
 [mmFormer: Multimodal Medical Transformer for Incomplete Multimodal Learning of Brain Tumor Segmentation](https://arxiv.org/abs/2206.02425)
 
-Accepted to MICCAI 2022
+Accepted to MICCAI 2022 (Student Travel Award)
 
 ## Abstract
 
