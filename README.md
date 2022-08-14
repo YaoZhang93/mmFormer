@@ -13,33 +13,21 @@ Accurate brain tumor segmentation from Magnetic Resonance Imaging (MRI) is desir
 
 ## Usage. 
 
+* Environment Preparation
+  * Download the cuda and pytorch from [Google Drive](https://drive.google.com/drive/folders/1x6z7Ot3Xfrg1dokR9cdeoRSKbQJRTpv7?usp=sharing).
+  * Set the environment path in `job.sh`.
 * Data Preparation
-
-  - Download the data from [MICCAI 2018 BraTS Challenge](https://www.med.upenn.edu/sbia/brats2018/data.html).
-
-  - Put `Training` folder in  `./data` 
-
-  - In `./data`, preprocess the data by `python preprocess.py`
-
+- Download the data from [MICCAI 2018 BraTS Challenge](https://www.med.upenn.edu/sbia/brats2018/data.html).
+  - Set the data path in `preprocess.py` and then run `python preprocess.py`.
+- Set the data path in `job.sh`
 * Train
 
-  - Train the model by
-
-  `python -m torch.distributed.launch --nproc_per_node=4 --master_port 20003 train.py`
+  - Train the model by `sh job.sh`. 
 
 * Test
-
-  - inference on the test data by
-
-  `python test.py`
-
-  - To inference with missing modalities, please refer to line 201 in [`BraTS.py`](https://github.com/YaoZhang93/mmFormer/blob/main/mmformer/data/BraTS.py)
-  
-    `missing_modal_list.append(MISSING_MODAL)`
-  
-    MISSING_MODAL is a list of missing modalities and each modality is denoted by a number.
-  
-    `0: FLAIR, 1:T1CE, 2:T1, 3:T2`
+  * The trained model should be located in `mmFormer/output`. 
+  * Uncomment the evaluation command in  `job.sh` and then inference on the test data by `sh job.sh`.
+  * The pre-trained [model](https://drive.google.com/file/d/1oKgjXzSfWOG5VT64EE1lfV6rdtjkyC5B/view?usp=sharing) and [log](https://drive.google.com/file/d/165u-MGAiS0_PkExXRkI4KrainRlc_Ibo/view?usp=sharing) are available.
 
 ## Citation
 
@@ -57,4 +45,5 @@ If you find this code and paper useful for your research, please kindly cite our
 ## Reference
 
 * [TransBTS](https://github.com/Wenxuan-1119/TransBTS)
+* [RFNet](https://github.com/dyh127/RFNet)
 

@@ -4,233 +4,226 @@ import logging
 import torch
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
-cudnn.benchmark = True
 import numpy as np
 import nibabel as nib
-import imageio
+import scipy.misc
+
+cudnn.benchmark = True
+
+path = os.path.dirname(__file__)
+from utils.generate import generate_snapshot
+
+patch_size = 128
+
+def softmax_output_dice_class4(output, target):
+    eps = 1e-8
+    #######label1########
+    o1 = (output == 1).float()
+    t1 = (target == 1).float()
+    intersect1 = torch.sum(2 * (o1 * t1), dim=(1,2,3)) + eps
+    denominator1 = torch.sum(o1, dim=(1,2,3)) + torch.sum(t1, dim=(1,2,3)) + eps
+    ncr_net_dice = intersect1 / denominator1
+
+    o2 = (output == 2).float()
+    t2 = (target == 2).float()
+    intersect2 = torch.sum(2 * (o2 * t2), dim=(1,2,3)) + eps
+    denominator2 = torch.sum(o2, dim=(1,2,3)) + torch.sum(t2, dim=(1,2,3)) + eps
+    edema_dice = intersect2 / denominator2
+
+    o3 = (output == 3).float()
+    t3 = (target == 3).float()
+    intersect3 = torch.sum(2 * (o3 * t3), dim=(1,2,3)) + eps
+    denominator3 = torch.sum(o3, dim=(1,2,3)) + torch.sum(t3, dim=(1,2,3)) + eps
+    enhancing_dice = intersect3 / denominator3
+
+    ####post processing:
+    if torch.sum(o3) < 500:
+       o4 = o3 * 0.0
+    else:
+       o4 = o3
+    t4 = t3
+    intersect4 = torch.sum(2 * (o4 * t4), dim=(1,2,3)) + eps
+    denominator4 = torch.sum(o4, dim=(1,2,3)) + torch.sum(t4, dim=(1,2,3)) + eps
+    enhancing_dice_postpro = intersect4 / denominator4
+
+    o_whole = o1 + o2 + o3 
+    t_whole = t1 + t2 + t3 
+    intersect_whole = torch.sum(2 * (o_whole * t_whole), dim=(1,2,3)) + eps
+    denominator_whole = torch.sum(o_whole, dim=(1,2,3)) + torch.sum(t_whole, dim=(1,2,3)) + eps
+    dice_whole = intersect_whole / denominator_whole
+
+    o_core = o1 + o3
+    t_core = t1 + t3
+    intersect_core = torch.sum(2 * (o_core * t_core), dim=(1,2,3)) + eps
+    denominator_core = torch.sum(o_core, dim=(1,2,3)) + torch.sum(t_core, dim=(1,2,3)) + eps
+    dice_core = intersect_core / denominator_core
+
+    dice_separate = torch.cat((torch.unsqueeze(ncr_net_dice, 1), torch.unsqueeze(edema_dice, 1), torch.unsqueeze(enhancing_dice, 1)), dim=1)
+    dice_evaluate = torch.cat((torch.unsqueeze(dice_whole, 1), torch.unsqueeze(dice_core, 1), torch.unsqueeze(enhancing_dice, 1), torch.unsqueeze(enhancing_dice_postpro, 1)), dim=1)
+
+    return dice_separate.cpu().numpy(), dice_evaluate.cpu().numpy()
+
+def softmax_output_dice_class5(output, target):
+    eps = 1e-8
+    #######label1########
+    o1 = (output == 1).float()
+    t1 = (target == 1).float()
+    intersect1 = torch.sum(2 * (o1 * t1), dim=(1,2,3)) + eps
+    denominator1 = torch.sum(o1, dim=(1,2,3)) + torch.sum(t1, dim=(1,2,3)) + eps
+    necrosis_dice = intersect1 / denominator1
+
+    o2 = (output == 2).float()
+    t2 = (target == 2).float()
+    intersect2 = torch.sum(2 * (o2 * t2), dim=(1,2,3)) + eps
+    denominator2 = torch.sum(o2, dim=(1,2,3)) + torch.sum(t2, dim=(1,2,3)) + eps
+    edema_dice = intersect2 / denominator2
+
+    o3 = (output == 3).float()
+    t3 = (target == 3).float()
+    intersect3 = torch.sum(2 * (o3 * t3), dim=(1,2,3)) + eps
+    denominator3 = torch.sum(o3, dim=(1,2,3)) + torch.sum(t3, dim=(1,2,3)) + eps
+    non_enhancing_dice = intersect3 / denominator3
+
+    o4 = (output == 4).float()
+    t4 = (target == 4).float()
+    intersect4 = torch.sum(2 * (o4 * t4), dim=(1,2,3)) + eps
+    denominator4 = torch.sum(o4, dim=(1,2,3)) + torch.sum(t4, dim=(1,2,3)) + eps
+    enhancing_dice = intersect4 / denominator4
+
+    ####post processing:
+    if torch.sum(o4) < 500:
+        o5 = o4 * 0
+    else:
+        o5 = o4
+    t5 = t4
+    intersect5 = torch.sum(2 * (o5 * t5), dim=(1,2,3)) + eps
+    denominator5 = torch.sum(o5, dim=(1,2,3)) + torch.sum(t5, dim=(1,2,3)) + eps
+    enhancing_dice_postpro = intersect5 / denominator5
+
+    o_whole = o1 + o2 + o3 + o4
+    t_whole = t1 + t2 + t3 + t4
+    intersect_whole = torch.sum(2 * (o_whole * t_whole), dim=(1,2,3)) + eps
+    denominator_whole = torch.sum(o_whole, dim=(1,2,3)) + torch.sum(t_whole, dim=(1,2,3)) + eps
+    dice_whole = intersect_whole / denominator_whole
+
+    o_core = o1 + o3 + o4
+    t_core = t1 + t3 + t4
+    intersect_core = torch.sum(2 * (o_core * t_core), dim=(1,2,3)) + eps
+    denominator_core = torch.sum(o_core, dim=(1,2,3)) + torch.sum(t_core, dim=(1,2,3)) + eps
+    dice_core = intersect_core / denominator_core
+
+    dice_separate = torch.cat((torch.unsqueeze(necrosis_dice, 1), torch.unsqueeze(edema_dice, 1), torch.unsqueeze(non_enhancing_dice, 1), torch.unsqueeze(enhancing_dice, 1)), dim=1)
+    dice_evaluate = torch.cat((torch.unsqueeze(dice_whole, 1), torch.unsqueeze(dice_core, 1), torch.unsqueeze(enhancing_dice, 1), torch.unsqueeze(enhancing_dice_postpro, 1)), dim=1)
+
+    return dice_separate.cpu().numpy(), dice_evaluate.cpu().numpy()
 
 
-
-def one_hot(ori, classes):
-
-    batch, h, w, d = ori.size()
-    new_gd = torch.zeros((batch, classes, h, w, d), dtype=ori.dtype).cuda()
-    for j in range(classes):
-        index_list = (ori == j).nonzero()
-
-        for i in range(len(index_list)):
-            batch, height, width, depth = index_list[i]
-            new_gd[batch, j, height, width, depth] = 1
-
-    return new_gd.float()
-
-
-def tailor_and_concat(x, missing_modal, model):
-    temp = []
-
-    temp.append(x[..., :128, :128, :128])
-    temp.append(x[..., :128, 112:240, :128])
-    temp.append(x[..., 112:240, :128, :128])
-    temp.append(x[..., 112:240, 112:240, :128])
-    temp.append(x[..., :128, :128, 27:155])
-    temp.append(x[..., :128, 112:240, 27:155])
-    temp.append(x[..., 112:240, :128, 27:155])
-    temp.append(x[..., 112:240, 112:240, 27:155])
-
-    y = x.clone()
-
-    for i in range(len(temp)):
-        temp[i] = model(temp[i], missing_modal)[0]
-
-    y[..., :128, :128, :128] = temp[0]
-    y[..., :128, 128:240, :128] = temp[1][..., :, 16:128, :]
-    y[..., 128:240, :128, :128] = temp[2][..., 16:128, :, :]
-    y[..., 128:240, 128:240, :128] = temp[3][..., 16:128, 16:128, :]
-    y[..., :128, :128, 128:155] = temp[4][..., 96:123]
-    y[..., :128, 128:240, 128:155] = temp[5][..., :, 16:128, 96:123]
-    y[..., 128:240, :128, 128:155] = temp[6][..., 16:128, :, 96:123]
-    y[..., 128:240, 128:240, 128:155] = temp[7][..., 16:128, 16:128, 96:123]
-
-    return y[..., :155]
-
-
-def dice_score(o, t, eps=1e-8):
-    num = 2*(o*t).sum() + eps
-    den = o.sum() + t.sum() + eps
-    return num/den
-
-
-def mIOU(o, t, eps=1e-8):
-    num = (o*t).sum() + eps
-    den = (o | t).sum() + eps
-    return num/den
-
-
-def softmax_mIOU_score(output, target):
-    mIOU_score = []
-    mIOU_score.append(mIOU(o=(output==1),t=(target==1)))
-    mIOU_score.append(mIOU(o=(output==2),t=(target==2)))
-    mIOU_score.append(mIOU(o=(output==3),t=(target==4)))
-    return mIOU_score
-
-
-def softmax_output_dice(output, target):
-    ret = []
-
-    # whole
-    o = output > 0; t = target > 0 # ce
-    ret += dice_score(o, t),
-    # core
-    o = (output == 1) | (output == 3)
-    t = (target == 1) | (target == 4)
-    ret += dice_score(o, t),
-    # active
-    o = (output == 3);t = (target == 4)
-    ret += dice_score(o, t),
-
-    return ret
-
-
-keys = 'whole', 'core', 'enhancing', 'loss'
-
-
-def validate_softmax(
-        valid_loader,
+def test_softmax(
+        test_loader,
         model,
-        load_file,
-        multimodel,
-        savepath='',  # when in validation set, you must specify the path to save the 'nii' segmentation results here
-        names=None,  # The names of the patients orderly!
-        verbose=False,
-        use_TTA=False,  # Test time augmentation, False as default!
-        save_format=None,  # ['nii','npy'], use 'nii' as default. Its purpose is for submission.
-        snapshot=False,  # for visualization. Default false. It is recommended to generate the visualized figures.
-        visual='',  # the path to save visualization
-        postprocess=False,  # Default False, when use postprocess, the score of dice_ET would be changed.
-        valid_in_train=False,  # if you are valid when train
-        ):
+        dataname = 'BRATS2020',
+        feature_mask=None,
+        mask_name=None):
 
-    H, W, T = 240, 240, 160
+    H, W, T = 240, 240, 155
     model.eval()
+    vals_evaluation = AverageMeter()
+    vals_separate = AverageMeter()
+    one_tensor = torch.ones(1, patch_size, patch_size, patch_size).float().cuda()
 
-    runtimes = []
-    ET_voxels_pred_list = []
+    if dataname in ['BRATS2021', 'BRATS2020', 'BRATS2018']:
+        num_cls = 4
+        class_evaluation= 'whole', 'core', 'enhancing', 'enhancing_postpro'
+        class_separate = 'ncr_net', 'edema', 'enhancing'
+    elif dataname == 'BRATS2015':
+        num_cls = 5
+        class_evaluation= 'whole', 'core', 'enhancing', 'enhancing_postpro'
+        class_separate = 'necrosis', 'edema', 'non_enhancing', 'enhancing'
+        
 
-    for i, data in enumerate(valid_loader):
-        print('-------------------------------------------------------------------')
-        msg = 'Subject {}/{}, '.format(i + 1, len(valid_loader))
-        if valid_in_train:
-            # data = [t.cuda(non_blocking=True) for t in data]
-            x, target, missing_modal = data
-            x = x.cuda(non_blocking=True)
-            target = target.cuda(non_blocking=True)
+    for i, data in enumerate(test_loader):
+        target = data[1].cuda()
+        x = data[0].cuda()
+        names = data[-1]
+        if feature_mask is not None:
+            mask = torch.from_numpy(np.array(feature_mask))
+            mask = torch.unsqueeze(mask, dim=0).repeat(len(names), 1)
         else:
-            x, missing_modal = data
-            x.cuda()
+            mask = data[2]
+        mask = mask.cuda()
+        _, _, H, W, Z = x.size()
+        #########get h_ind, w_ind, z_ind for sliding windows
+        h_cnt = np.int(np.ceil((H - patch_size) / (patch_size * (1 - 0.5))))
+        h_idx_list = range(0, h_cnt)
+        h_idx_list = [h_idx * np.int(patch_size * (1 - 0.5)) for h_idx in h_idx_list]
+        h_idx_list.append(H - patch_size)
 
-        if not use_TTA:
-            torch.cuda.synchronize()  # add the code synchronize() to correctly count the runtime.
-            start_time = time.time()
-            logit = tailor_and_concat(x, missing_modal, model)
+        w_cnt = np.int(np.ceil((W - patch_size) / (patch_size * (1 - 0.5))))
+        w_idx_list = range(0, w_cnt)
+        w_idx_list = [w_idx * np.int(patch_size * (1 - 0.5)) for w_idx in w_idx_list]
+        w_idx_list.append(W - patch_size)
 
-            torch.cuda.synchronize()
-            elapsed_time = time.time() - start_time
-            logging.info('Single sample test time consumption {:.2f} minutes!'.format(elapsed_time/60))
-            runtimes.append(elapsed_time)
+        z_cnt = np.int(np.ceil((Z - patch_size) / (patch_size * (1 - 0.5))))
+        z_idx_list = range(0, z_cnt)
+        z_idx_list = [z_idx * np.int(patch_size * (1 - 0.5)) for z_idx in z_idx_list]
+        z_idx_list.append(Z - patch_size)
 
+        #####compute calculation times for each pixel in sliding windows
+        weight1 = torch.zeros(1, 1, H, W, Z).float().cuda()
+        for h in h_idx_list:
+            for w in w_idx_list:
+                for z in z_idx_list:
+                    weight1[:, :, h:h+patch_size, w:w+patch_size, z:z+patch_size] += one_tensor
+        weight = weight1.repeat(len(names), num_cls, 1, 1, 1)
 
-            if multimodel:
-                logit = F.softmax(logit, dim=1)
-                output = logit / 4.0
+        #####evaluation
+        pred = torch.zeros(len(names), num_cls, H, W, Z).float().cuda()
+        model.module.is_training=False
+        for h in h_idx_list:
+            for w in w_idx_list:
+                for z in z_idx_list:
+                    x_input = x[:, :, h:h+patch_size, w:w+patch_size, z:z+patch_size]
+                    pred_part = model(x_input, mask)
+                    pred[:, :, h:h+patch_size, w:w+patch_size, z:z+patch_size] += pred_part
+        pred = pred / weight
+        b = time.time()
+        pred = pred[:, :, :H, :W, :T]
+        pred = torch.argmax(pred, dim=1)
 
-                load_file1 = load_file.replace('7998', '7996')
-                if os.path.isfile(load_file1):
-                    checkpoint = torch.load(load_file1)
-                    model.load_state_dict(checkpoint['state_dict'])
-                    print('Successfully load checkpoint {}'.format(load_file1))
-                    logit = tailor_and_concat(x, model)
-                    logit = F.softmax(logit, dim=1)
-                    output += logit / 4.0
-                load_file1 = load_file.replace('7998', '7997')
-                if os.path.isfile(load_file1):
-                    checkpoint = torch.load(load_file1)
-                    model.load_state_dict(checkpoint['state_dict'])
-                    print('Successfully load checkpoint {}'.format(load_file1))
-                    logit = tailor_and_concat(x, model)
-                    logit = F.softmax(logit, dim=1)
-                    output += logit / 4.0
-                load_file1 = load_file.replace('7998', '7999')
-                if os.path.isfile(load_file1):
-                    checkpoint = torch.load(load_file1)
-                    model.load_state_dict(checkpoint['state_dict'])
-                    print('Successfully load checkpoint {}'.format(load_file1))
-                    logit = tailor_and_concat(x, model)
-                    logit = F.softmax(logit, dim=1)
-                    output += logit / 4.0
-            else:
-                output = F.softmax(logit, dim=1)
-
-
-        else:
-            x = x[..., :155]
-            logit = F.softmax(tailor_and_concat(x, missing_modal, model), 1)  # no flip
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(2,)), missing_modal, model).flip(dims=(2,)), 1)  # flip H
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(3,)), missing_modal, model).flip(dims=(3,)), 1)  # flip W
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(4,)), missing_modal, model).flip(dims=(4,)), 1)  # flip D
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(2, 3)), missing_modal, model).flip(dims=(2, 3)), 1)  # flip H, W
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(2, 4)), missing_modal, model).flip(dims=(2, 4)), 1)  # flip H, D
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(3, 4)), missing_modal, model).flip(dims=(3, 4)), 1)  # flip W, D
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(2, 3, 4)), missing_modal, model).flip(dims=(2, 3, 4)), 1)  # flip H, W, D
-            output = logit / 8.0  # mean
-
-        output = output[0, :, :H, :W, :T].cpu().detach().numpy()
-        output = output.argmax(0)
-
-        name = str(i)
-        if names:
-            name = names[i]
+        if dataname in ['BRATS2021', 'BRATS2020', 'BRATS2018']:
+            scores_separate, scores_evaluation = softmax_output_dice_class4(pred, target)
+        elif dataname == 'BRATS2015':
+            scores_separate, scores_evaluation = softmax_output_dice_class5(pred, target)
+        for k, name in enumerate(names):
+            msg = 'Subject {}/{}, {}/{}'.format((i+1), len(test_loader), (k+1), len(names))
             msg += '{:>20}, '.format(name)
 
-        print(msg)
+            vals_separate.update(scores_separate[k])
+            vals_evaluation.update(scores_evaluation[k])
+            msg += ', '.join(['{}: {:.4f}'.format(k, v) for k, v in zip(class_evaluation, scores_evaluation[k])])
+            #msg += ',' + ', '.join(['{}: {:.4f}'.format(k, v) for k, v in zip(class_separate, scores_separate[k])])
 
-        if savepath:
-            # .npy for further model ensemble
-            # .nii for directly model submission
-            assert save_format in ['npy', 'nii']
-            if save_format == 'npy':
-                np.save(os.path.join(savepath, name + '_preds'), output)
-            if save_format == 'nii':
-                # raise NotImplementedError
-                oname = os.path.join(savepath, name + '.nii.gz')
-                seg_img = np.zeros(shape=(H, W, T), dtype=np.uint8)
+            logging.info(msg)
+    msg = 'Average scores:'
+    msg += ', '.join(['{}: {:.4f}'.format(k, v) for k, v in zip(class_evaluation, vals_evaluation.avg)])
+    #msg += ',' + ', '.join(['{}: {:.4f}'.format(k, v) for k, v in zip(class_separate, vals_evaluation.avg)])
+    print (msg)
+    model.train()
+    return vals_evaluation.avg
 
-                seg_img[np.where(output == 1)] = 1
-                seg_img[np.where(output == 2)] = 2
-                seg_img[np.where(output == 3)] = 4
-                if verbose:
-                    print('1:', np.sum(seg_img == 1), ' | 2:', np.sum(seg_img == 2), ' | 4:', np.sum(seg_img == 4))
-                    print('WT:', np.sum((seg_img == 1) | (seg_img == 2) | (seg_img == 4)), ' | TC:',
-                          np.sum((seg_img == 1) | (seg_img == 4)), ' | ET:', np.sum(seg_img == 4))
-                nib.save(nib.Nifti1Image(seg_img, None), oname)
-                print('Successfully save {}'.format(oname))
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+    def __init__(self):
+        self.reset()
 
-                if snapshot:
-                    """ --- grey figure---"""
-                    # Snapshot_img = np.zeros(shape=(H,W,T),dtype=np.uint8)
-                    # Snapshot_img[np.where(output[1,:,:,:]==1)] = 64
-                    # Snapshot_img[np.where(output[2,:,:,:]==1)] = 160
-                    # Snapshot_img[np.where(output[3,:,:,:]==1)] = 255
-                    """ --- colorful figure--- """
-                    Snapshot_img = np.zeros(shape=(H, W, 3, T), dtype=np.uint8)
-                    Snapshot_img[:, :, 0, :][np.where(output == 1)] = 255
-                    Snapshot_img[:, :, 1, :][np.where(output == 2)] = 255
-                    Snapshot_img[:, :, 2, :][np.where(output == 3)] = 255
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
 
-                    for frame in range(T):
-                        if not os.path.exists(os.path.join(visual, name)):
-                            os.makedirs(os.path.join(visual, name))
-                        # scipy.misc.imsave(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
-                        imageio.imwrite(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
-
-
-    # print('runtimes:', sum(runtimes)/len(runtimes))
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
