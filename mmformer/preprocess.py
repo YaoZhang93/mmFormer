@@ -1,11 +1,16 @@
 import os
 import numpy as np
 import medpy.io as medio
+join=os.path.join
 
-src_path = 'path_of_raw_BRATS2020'
-tar_path = 'path_of_processed_BRATS2020'
+src_path = '../../../../DB/BraTS18/ori_data/Training'
+tar_path = '../../../../DB/BraTS18/ori_data/BRATS2018_Training_none_npy'
 
-name_list = os.listdir(src_path)
+HGG_list = os.listdir(join(src_path, 'HGG'))
+HGG_list = ['HGG/'+x for x in HGG_list]
+LGG_list = os.listdir(join(src_path, 'LGG'))
+LGG_list = ['LGG/'+x for x in LGG_list]
+name_list = HGG_list + LGG_list
 
 def sup_128(xmin, xmax):
     if xmax - xmin < 128:
@@ -54,12 +59,15 @@ if not os.path.exists(os.path.join(tar_path, 'seg')):
 
 for file_name in name_list:
     print (file_name)
-    num = file_name.split('_')[2]
-    HLG = 'HG_' if int(num) <= 259 or int(num) >= 336 else 'LG_'
-    flair, flair_header = medio.load(os.path.join(src_path, file_name, file_name+'_flair.nii.gz'))
-    t1ce, t1ce_header = medio.load(os.path.join(src_path, file_name, file_name+'_t1ce.nii.gz'))
-    t1, t1_header = medio.load(os.path.join(src_path, file_name, file_name+'_t1.nii.gz'))
-    t2, t2_header = medio.load(os.path.join(src_path, file_name, file_name+'_t2.nii.gz'))
+    if 'HGG' in file_name:
+        HLG = 'HGG_'
+    else:
+        HLG = 'LGG_'
+    case_id = file_name.split('/')[-1]
+    flair, flair_header = medio.load(os.path.join(src_path, file_name, case_id+'_flair.nii.gz'))
+    t1ce, t1ce_header = medio.load(os.path.join(src_path, file_name, case_id+'_t1ce.nii.gz'))
+    t1, t1_header = medio.load(os.path.join(src_path, file_name, case_id+'_t1.nii.gz'))
+    t2, t2_header = medio.load(os.path.join(src_path, file_name, case_id+'_t2.nii.gz'))
 
     vol = np.stack((flair, t1ce, t1, t2), axis=0).astype(np.float32)
     x_min, x_max, y_min, y_max, z_min, z_max = crop(vol)
@@ -67,10 +75,10 @@ for file_name in name_list:
     vol1 = vol1.transpose(1,2,3,0)
     print (vol1.shape)
 
-    seg, seg_header = medio.load(os.path.join(src_path, file_name, file_name+'_seg.nii.gz'))
+    seg, seg_header = medio.load(os.path.join(src_path, file_name, case_id+'_seg.nii.gz'))
     seg = seg.astype(np.uint8)
     seg1 = seg[x_min:x_max, y_min:y_max, z_min:z_max]
     seg1[seg1==4]=3
 
-    np.save(os.path.join(tar_path, 'vol', HLG+file_name+'_vol.npy'), vol1)
-    np.save(os.path.join(tar_path, 'seg', HLG+file_name+'_seg.npy'), seg1)
+    np.save(os.path.join(tar_path, 'vol', HLG+case_id+'_vol.npy'), vol1)
+    np.save(os.path.join(tar_path, 'seg', HLG+case_id+'_seg.npy'), seg1)
