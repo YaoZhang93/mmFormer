@@ -35,7 +35,7 @@ parser.add_argument('--lr', default=2e-4, type=float)
 parser.add_argument('--weight_decay', default=1e-4, type=float)
 parser.add_argument('--num_epochs', default=300, type=int)
 parser.add_argument('--iter_per_epoch', default=150, type=int)
-parser.add_argument('--region_fusion_start_epoch', default=20, type=int)
+parser.add_argument('--region_fusion_start_epoch', default=0, type=int)
 parser.add_argument('--seed', default=1024, type=int)
 path = os.path.dirname(__file__)
 
