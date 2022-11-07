@@ -15,9 +15,9 @@ if __name__ == '__main__':
             'flairt1cet1t2']
     
     test_transforms = 'Compose([NumpyType((np.float32, np.int64)),])'
-    datapath = '../../RFNet/RFNet/BRATS2018_Training_none_npy'
-    test_file = 'test3.txt'
-    resume = 'output/model_last.pth'
+    datapath = ''
+    test_file = ''
+    resume = ''
     num_cls = 4
     dataname = 'BRATS2018'
 
