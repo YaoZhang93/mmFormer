@@ -19,4 +19,4 @@ $PYTHON train.py --batch_size=4 --datapath $datapath --savepath $savepath --num_
 
 #eval:
 #resume=output/model_last.pth
-#$PYTHON train.py --batch_size=2 --iter_per_epoch 150 --datapath $datapath --savepath $savepath --num_epochs 300 --lr 2e-4 --region_fusion_start_epoch 20 --dataname $dataname --resume $resume
+#$PYTHON train.py --batch_size=4 --datapath $datapath --savepath $savepath --num_epochs 0 --dataname $dataname --resume $resume
