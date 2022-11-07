@@ -15,8 +15,8 @@ PYTHON=$pypath/bin/python3.6
 export PATH=$pypath/include:$pypath/bin:$PATH
 export LD_LIBRARY_PATH=$pypath/lib:$LD_LIBRARY_PATH
 
-$PYTHON train.py --batch_size=4 --datapath $datapath --savepath $savepath --num_epochs 1000 --dataname $dataname
+$PYTHON train.py --batch_size=8 --datapath $datapath --savepath $savepath --num_epochs 1000 --dataname $dataname
 
 #eval:
 #resume=output/model_last.pth
-#$PYTHON train.py --batch_size=4 --datapath $datapath --savepath $savepath --num_epochs 0 --dataname $dataname --resume $resume
+#$PYTHON train.py --batch_size=1 --datapath $datapath --savepath $savepath --num_epochs 0 --dataname $dataname --resume $resume
