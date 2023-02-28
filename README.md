@@ -34,11 +34,13 @@ Accurate brain tumor segmentation from Magnetic Resonance Imaging (MRI) is desir
 If you find this code and paper useful for your research, please kindly cite our paper.
 
 ```
-@article{zhang2022mmformer,
-  title={mmFormer: Multimodal Medical Transformer for Incomplete Multimodal Learning of Brain Tumor Segmentation},
+@inproceedings{zhang2022mmformer,
+  title={mmformer: Multimodal medical transformer for incomplete multimodal learning of brain tumor segmentation},
   author={Zhang, Yao and He, Nanjun and Yang, Jiawei and Li, Yuexiang and Wei, Dong and Huang, Yawen and Zhang, Yang and He, Zhiqiang and Zheng, Yefeng},
-  journal={arXiv preprint arXiv:2206.02425},
-  year={2022}
+  booktitle={Medical Image Computing and Computer Assisted Intervention--MICCAI 2022: 25th International Conference, Singapore, September 18--22, 2022, Proceedings, Part V},
+  pages={107--117},
+  year={2022},
+  organization={Springer}
 }
 ```
 
