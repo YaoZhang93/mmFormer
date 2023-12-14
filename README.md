@@ -17,12 +17,11 @@ Accurate brain tumor segmentation from Magnetic Resonance Imaging (MRI) is desir
   * Download the cuda and pytorch from [Google Drive](https://drive.google.com/drive/folders/1x6z7Ot3Xfrg1dokR9cdeoRSKbQJRTpv7?usp=sharing).
   * Set the environment path in `job.sh`.
 * Data Preparation
-- Download the data from [MICCAI 2018 BraTS Challenge](https://www.med.upenn.edu/sbia/brats2018/data.html).
-  - Set the data path in `preprocess.py` and then run `python preprocess.py`.
-- Set the data path in `job.sh`
+  * Download the data from [MICCAI 2018 BraTS Challenge](https://www.med.upenn.edu/sbia/brats2018/data.html).
+  * Set the data path in `preprocess.py` and then run `python preprocess.py`.
+  * Set the data path in `job.sh`
 * Train
-
-  - Train the model by `sh job.sh`. 
+  * Train the model by `sh job.sh`. 
 
 * Test
   * The trained model should be located in `mmFormer/output`. 
