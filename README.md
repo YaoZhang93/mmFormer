@@ -19,7 +19,7 @@ Accurate brain tumor segmentation from Magnetic Resonance Imaging (MRI) is desir
 * Data Preparation
   * Download the data from [MICCAI 2018 BraTS Challenge](https://www.med.upenn.edu/sbia/brats2018/data.html).
   * Set the data path in `preprocess.py` and then run `python preprocess.py`.
-  * Set the data path in `job.sh`
+  * Set the data path in `job.sh`.
 * Train
   * Train the model by `sh job.sh`. 
 
